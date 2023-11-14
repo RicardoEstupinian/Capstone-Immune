@@ -1,0 +1,64 @@
+apiVersion: vpcresources.k8s.aws/v1beta1
+kind: SecurityGroupPolicy
+metadata:
+  name: auth-service-group-policy
+  namespace: app
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+      role: test-service-role
+  securityGroups:
+    groupIds:
+      -  # Security group created for pod
+      -  # Security group control plane
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service-dp
+  namespace: app
+  labels:
+    app: backend
+spec:
+  selector:
+    matchLabels:
+      app: backend
+      role: test-service-role
+      svc: test-service-svc
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: backend
+        role: test-service-role
+        svc : test-service-svc
+    spec:
+      containers:
+        - name: test-service
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "1.0"
+              memory: "1.5Gi"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: app
+  name: test-service-svc
+spec:
+  selector:
+    app: backend
+    svc : test-service-svc
+  ports:
+    - protocol: TCP
+      port: 8002
+      targetPort: 80
+  type: ClusterIP
