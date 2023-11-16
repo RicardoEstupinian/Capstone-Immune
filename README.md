@@ -50,7 +50,21 @@ Para el manejo del estado de terraform (archivos .tfstate) se necesita la creaci
    **Resultado**
    - Cluster EKS configurado
 
-7. Ejecutar codigo de la carpeta de implementacion **COMPUTE/ECR**
+7. Ejecutar los siguientes comandos para el correcto funcionamiento de los pods **CORE DNS**. Documentacion AWS: https://docs.aws.amazon.com/eks/latest/userguide/fargate-getting-started.html
+
+   **Comandos a ejecutar:**
+   - kubectl patch deployment coredns -n kube-system --type json -p='[{"op": "remove", "path": "/spec/template/metadata/annotations/eks.amazonaws.com~1compute-type"}]'
+   - kubectl rollout restart -n kube-system deployment coredns
+     
+8. Ejecutar codigo de la carpeta de implementacion **COMPUTE/SECURITY-GROUP-PODS**
 
    **Resultado**
-   - Repositorios ECR para almacenar imagenes Docker de los microservicios
+   - Lista de security groups para los microservicios
+   
+9. Ejecutar objetos Kubernets para activar logs en **Cloudwatch**.
+
+   **Crear objetos K8s:**
+   - k8s/aws-observability-namespace.yaml
+   - k8s/aws-logging-cloudwatch-configmap.yaml
+
+**NOTA:** Se adjunta el ejemplo de un DEPLOYMENT con su respectivo SERVICE y SECURITY GROUP asociado para probar la solucion. Ademas se adjunta el ejemplo de un Ingress que aprovisiona automaticamente un ALB.
